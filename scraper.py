@@ -1,11 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-import asyncio
-from telegram import Bot
 import os
+import httpx
 from dotenv import load_dotenv
-import schedule
-import time
 
 load_dotenv()
 
@@ -19,7 +16,6 @@ def scrape_taux():
     try:
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
-        
         texte = soup.get_text()
         date = ""
         prime_filleul = ""
@@ -35,7 +31,7 @@ def scrape_taux():
             if "80€" in ligne and "110€" in ligne and not prime_parrain:
                 prime_parrain = ligne.replace("PrimeEntre", "Entre")
 
-        message = f"""🏦 BoursoBank Parrainage Tracker
+        return f"""🏦 BoursoBank Parrainage Tracker
 
 📅 Prochaine offre : {date}
 💰 Prime filleul : {prime_filleul}
@@ -43,15 +39,14 @@ def scrape_taux():
 
 🔗 detective-banque.fr"""
         
-        return message
-        
     except Exception as e:
         return f"❌ Erreur : {e}"
 
 def job():
     print("Scraping en cours...")
     resultat = scrape_taux()
-    asyncio.run(envoyer_message(resultat))
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    httpx.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": resultat})
     print("Message envoyé !")
 
 job()
