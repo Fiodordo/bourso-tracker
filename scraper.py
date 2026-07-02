@@ -48,19 +48,10 @@ def scrape_taux():
     except Exception as e:
         return f"❌ Erreur : {e}"
 
-async def envoyer_message(texte):
-    bot = Bot(token=TELEGRAM_TOKEN)
-    await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=texte)
-
 def job():
     print("Scraping en cours...")
     resultat = scrape_taux()
     asyncio.run(envoyer_message(resultat))
     print("Message envoyé !")
 
-schedule.every().day.at("09:00").do(job)
-print("✅ Tracker démarré - notification chaque matin à 9h")
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+job()
